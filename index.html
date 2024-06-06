@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TO-DOs</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/feaaf8de4f.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <section class="container">
+        <h1>TO-DOs</h1>
+        <div class="input-container glass-effect">
+            <i class="fa-solid fa-square-caret-down" onclick="toggleCheckboxes()"></i>
+            <input type="text" name="" id="input-box" placeholder="Enter a new task here">
+        </div>
+        <div class="todo-section glass-effect" style="display: none;">
+        </div>
+        <div class="foot-container glass-effect">
+            <div id="count">0 items left</div>
+            <div class="filters">
+                <button class="active" onclick="updateList(this, 'all')">All</button>
+                <button onclick="updateList(this, 'active')">Active</button>
+                <button onclick="updateList(this, 'completed')">Completed</button>
+            </div>
+            <button onclick="deleteAllCompleted()">Clear completed</button>
+        </div>
+    </section>
+    <script src="script.js"></script>
+</body>
+</html>
