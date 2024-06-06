@@ -77,7 +77,7 @@ body{
     font-style: italic;
     background-color: transparent;
     border: none;
-    width: 90%;
+    width: 80%;
     font-size: 18px;
 }
 
@@ -188,5 +188,14 @@ body{
 @media (max-width: 1000px){
     .container{
         width: 90%;
+    }
+
+    .todo-section{
+        max-height: 50%;
+    }
+
+    .foot-container{
+        flex-direction: column;
+        gap: 30px;
     }
 }
