@@ -66,7 +66,7 @@ function updateList(element, state){
         currentList = state;
     }
 
-    for(let card of cards){
+    Object.values(cards).forEach((card) => {
         let checkbox = card.querySelector("input[type='checkbox']");
         if(checkbox.checked){
             card.classList.add("completed")
@@ -83,7 +83,8 @@ function updateList(element, state){
                 card.style.display = "flex";
             }
         }
-    }
+    })
+
 
     if(element){
         let filters = document.querySelector('.filters').children;
@@ -102,13 +103,12 @@ function updateCount(){
     let count = 0;
     let cards = document.querySelector(".todo-section").children;
 
-    for(let card of cards){
+    Object.values(cards).forEach((card) => {
         let checkbox = card.querySelector("input[type='checkbox']");
         if(!checkbox.checked){
             count++
         }
-    }
-
+    })
     document.getElementById("count").innerHTML = `${count} items left`;
 
     if(currentList == "all" && cards.length > 0){
