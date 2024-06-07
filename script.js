@@ -105,6 +105,7 @@ function deleteTask(id){
         tasks = tasks.filter((task) => {
             return task.id != id;
         })
+        saveTasks();
         render();
     } catch (error) {
         alert(error)
@@ -118,7 +119,7 @@ function changeState(id){
                 task.state = task.state == "notCompleted" ? "isCompleted" : "notCompleted";
             }
         })
-    
+        saveTasks();
         updateCount();
     } catch (error) {
         alert(error);
@@ -172,7 +173,7 @@ function toggleAllCheckboxes() {
         }
         return task;
       });
-  
+      saveTasks();
       render();
     } catch (error) {
       alert(error);
@@ -183,15 +184,36 @@ function deleteAllCompleted(){
     try {
         tasks = tasks.filter((task) => {
             return task.state == "notCompleted" 
-        })
+        });
+        saveTasks();
         render();
     } catch (error) {
         alert(error);
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function saveTasks() {
+    try {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    } catch (error) {
+      alert(error);
+    }
+}
 
+function loadTasks() {
+    try {
+      const storedTasks = localStorage.getItem('tasks');
+      if (storedTasks) {
+        tasks = JSON.parse(storedTasks);
+      }
+    } catch (error) {
+      alert(error);
+    }
+}  
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadTasks();
+    render();
     let inputBox = document.getElementById("input-box");
 
     inputBox.addEventListener('keydown', (event) => {
@@ -201,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(task.length > 1){
                 let obj = { id: Date.now(), task: task, state: "notCompleted"}
                 tasks.push(obj);
+                saveTasks();
                 render();
             } else {
                 alert("The task name should be greater than 1.");
