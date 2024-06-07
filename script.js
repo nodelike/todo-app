@@ -1,23 +1,8 @@
 let currentList = "all";
+let tasks = [];
 
-function createTask(task){
+function createEditEvent(taskDiv){
     try {
-        let todoSection = document.querySelector(".todo-section");
-
-        let cardDiv = document.createElement('div');
-        cardDiv.classList.toggle('card');
-    
-        //checkbox
-        let checkbox = document.createElement('input');
-        checkbox.setAttribute('type', 'checkbox');
-        checkbox.setAttribute('onchange', 'updateList()');
-        checkbox.classList.toggle('checkbox');
-    
-        //task div
-        let taskDiv = document.createElement('div');
-        taskDiv.classList.toggle('task');
-        taskDiv.innerText = task;
-    
         taskDiv.addEventListener('dblclick', function() {
             let currentTask = this.innerText;
             let inputElement = document.createElement('input');
@@ -27,108 +12,135 @@ function createTask(task){
             this.innerText = '';
             this.appendChild(inputElement);
             inputElement.focus();
-        
+    
             inputElement.addEventListener('keypress', function(event) {
-              if (event.key === 'Enter') {
+            if (event.key === 'Enter') {
                 let editedTask = this.value;
                 if(editedTask.length > 1){
                     taskDiv.innerText = editedTask;
-                    updateList();
+                    render(tasks);
                 } else {
                     alert("The task name should be greater than 1.");
                 }
-              }
+            }
             });
         });
-        
-    
-        //delete icon
-        let deleteIcon = document.createElement('i');
-        deleteIcon.setAttribute('onclick', 'deleteTask(this)')
-        deleteIcon.classList.toggle('fa-solid');
-        deleteIcon.classList.toggle('fa-trash');
-    
-        cardDiv.appendChild(checkbox);
-        cardDiv.appendChild(taskDiv);
-        cardDiv.appendChild(deleteIcon);
-    
-        todoSection.appendChild(cardDiv);
-        updateList();
     } catch (error) {
-        alert(error)
+        alert(error);
     }
+    
 }
 
-function deleteTask(element){
+function updateList(element, list){
     try {
-        element.parentNode.remove();
-        updateCount();
-    } catch (error) {
-        alert(error)
-    }
-}
-
-function updateList(element, state){
-    try {
-        let cards = document.querySelector(".todo-section").children;
-        if(state){
-            currentList = state;
-        }
-    
-        Object.values(cards).forEach((card) => {
-            let checkbox = card.querySelector("input[type='checkbox']");
-            if(checkbox.checked){
-                card.classList.add("completed")
-                if(currentList == "active"){
-                    card.style.display = "none"
-                } else {
-                    card.style.display = "flex";
-                }
-            } else{
-                card.classList.remove("completed")
-                if(currentList == "completed"){
-                    card.style.display = "none"
-                } else {
-                    card.style.display = "flex";
-                }
-            }
+        currentList = list;
+        let filters = document.querySelector('.filters').children;
+        Object.values(filters).forEach((filter) => {
+            filter.classList.remove('active');
         })
-    
-    
-        if(element){
-            let filters = document.querySelector('.filters').children;
-            
-            for(let filter of filters){
-                filter.classList.remove('active');
-            }
-    
-            element.classList.toggle('active');
-        }
-        updateCount();    
+
+        element.classList.toggle('active');
+        render();
     } catch (error) {
         alert(error);
     }
 }
 
+function render(){
+    try {
+        let todoSection = document.querySelector(".todo-section");
+        todoSection.innerHTML = "";
+        let data = tasks;
+    
+        data = tasks.filter((task) => {
+            if(currentList == "all"){
+                return true;
+            } else if(currentList == "active"){
+                return task.state == "notCompleted";
+            } else {
+                return task.state == "isCompleted";
+            }
+        })
+        
+    
+        data.forEach((task) => {
+            let cardDiv = document.createElement('div');
+            cardDiv.classList.toggle('card');
+    
+            let checkbox = document.createElement('input');
+            checkbox.setAttribute('type', 'checkbox');
+            checkbox.setAttribute('onchange', `changeState(${task.id})`);
+            checkbox.checked = task.state == "isCompleted";
+            checkbox.classList.toggle('checkbox');
+        
+            //task div
+            let taskDiv = document.createElement('div');
+            taskDiv.classList.toggle('task');
+            taskDiv.innerText = task.task;
+    
+            createEditEvent(taskDiv);
+            
+        
+            //delete icon
+            let deleteIcon = document.createElement('i');
+            deleteIcon.setAttribute('onclick', `deleteTask(${task.id})`)
+            deleteIcon.classList.toggle('fa-solid');
+            deleteIcon.classList.toggle('fa-trash');
+        
+            cardDiv.appendChild(checkbox);
+            cardDiv.appendChild(taskDiv);
+            cardDiv.appendChild(deleteIcon);
+            todoSection.appendChild(cardDiv);
+        })
+    
+        updateCount();
+    } catch (error) {
+        alert(error);
+    }
+    
+}
+
+function deleteTask(id){
+    try {
+        tasks = tasks.filter((task) => {
+            return task.id != id;
+        })
+        render();
+    } catch (error) {
+        alert(error)
+    }
+}
+
+function changeState(id){
+    try {
+        tasks.forEach((task) => {
+            if(task.id == id){
+                task.state = task.state == "notCompleted" ? "isCompleted" : "notCompleted";
+            }
+        })
+    
+        updateCount();
+    } catch (error) {
+        alert(error);
+    }
+    
+}
+
 function updateCount(){
     try {
         let todoDiv = document.querySelector(".todo-section");
-        let count = 0;
-        let cards = document.querySelector(".todo-section").children;
+        let count = tasks.filter((task) => {
+            return task.state == "notCompleted";
+        }).length;
     
-        Object.values(cards).forEach((card) => {
-            let checkbox = card.querySelector("input[type='checkbox']");
-            if(!checkbox.checked){
-                count++
-            }
-        })
+        
         document.getElementById("count").innerHTML = `${count} items left`;
     
-        if(currentList == "all" && cards.length > 0){
+        if(currentList == "all" && tasks.length > 0){
             todoDiv.style.display = "block";
         } else if(currentList == "active" && count > 0) {
             todoDiv.style.display = "block";
-        } else if(currentList == "completed" && cards.length - count > 0){
+        } else if(currentList == "completed" && tasks.length - count > 0){
             todoDiv.style.display = "block";
         } else{
             todoDiv.style.display = "none";
@@ -138,46 +150,41 @@ function updateCount(){
     }
 }
 
-function toggleCheckboxes(){
+function toggleAllCheckboxes() {
     try {
-        let cards = document.querySelector(".todo-section").children;
-        let allChecked = true;
-    
-        Object.values(cards).forEach((card) => {
-            if(card.style.display == "flex"){
-                let checkbox = card.querySelector("input[type='checkbox']");
-                if(!checkbox.checked) {
-                    allChecked = false;
-                }
-            }
-        });
-    
-        Object.values(cards).forEach((card) => {
-            if(card.style.display == "flex"){
-                let checkbox = card.querySelector("input[type='checkbox']");
-                checkbox.checked = !allChecked;
-            }
-        });
-    
-        updateList();
+      let allChecked = tasks.every((task) => {
+        if (currentList === "all") {
+          return task.state === "isCompleted";
+        } else if (currentList === "active") {
+          return task.state === "isCompleted";
+        } else if (currentList === "completed") {
+          return task.state === "isCompleted";
+        }
+      });
+  
+      tasks = tasks.map((task) => {
+        if (currentList === "all") {
+          task.state = allChecked ? "notCompleted" : "isCompleted";
+        } else if (currentList === "active" && task.state === "notCompleted") {
+          task.state = "isCompleted";
+        } else if (currentList === "completed" && task.state === "isCompleted") {
+          task.state = "notCompleted";
+        }
+        return task;
+      });
+  
+      render();
     } catch (error) {
-        alert(error);
+      alert(error);
     }
-    
 }
 
 function deleteAllCompleted(){
     try {
-        let cards = document.querySelector(".todo-section").children;
-
-        Object.values(cards).forEach((card) => {
-            let checkbox = card.querySelector("input[type='checkbox']");
-            if(checkbox.checked){
-               card.remove();
-            }
+        tasks = tasks.filter((task) => {
+            return task.state == "notCompleted" 
         })
-    
-        updateList();
+        render();
     } catch (error) {
         alert(error);
     }
@@ -192,7 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const task = inputBox.value.trim();
             inputBox.value = "";
             if(task.length > 1){
-                createTask(task)
+                let obj = { id: Date.now(), task: task, state: "notCompleted"}
+                tasks.push(obj);
+                render();
             } else {
                 alert("The task name should be greater than 1.");
             }
